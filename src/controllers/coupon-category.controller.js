@@ -34,8 +34,9 @@ export const createCouponCategory = async (req, res) => {
 
 export const getCouponCategory = async (req, res) => {
 	try {
-		const { id, isActive } = req.query;
+		const { id, isActive, isNotActive } = req.query;
 		let couponCategories;
+		console.log(typeof isActive);
 
 		if (id) {
 			const couponCategory = await CouponCategory.findById(id);
@@ -45,10 +46,10 @@ export const getCouponCategory = async (req, res) => {
 			});
 		}
 
-		if (isActive === true) {
-			couponCategories = await CouponCategory.find({ is_active: true });
-		} else if (isActive === false) {
-			couponCategories = await CouponCategory.find({ is_active: false });
+		if (isActive) {
+			couponCategories = await CouponCategory.find({ isActive: true });
+		} else if (isNotActive) {
+			couponCategories = await CouponCategory.find({ isActive: false });
 		} else {
 			couponCategories = await CouponCategory.find();
 		}

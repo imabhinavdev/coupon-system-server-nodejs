@@ -8,6 +8,6 @@ router.post('/verify/:id', C.verifyCoupon);
 router.get('/stats', C.getCouponStats);
 router.get('/users-per-category', C.getUsersPerCouponCategory);
 router.get('/used-per-day', C.getCouponsUsedPerDay);
-router.get('/used-per-weekdays', C.getCouponStatsByWeekday);
+router.get('/used-by-weekdays', C.getCouponStatsByWeekday);
 
 export default router;

@@ -104,9 +104,10 @@ export const deleteUser = async (req, res) => {
 
 export const getUser = async (req, res) => {
 	const id = req.params.id;
-	const is_staff = req.query.is_staff;
-	const is_admin = req.query.is_admin;
-	const other_users = req.query.other_users;
+	const isStaff = req.query.isStaff;
+	const isAdmin = req.query.isAdmin;
+	const other_users = req.query.otherUsers;
+	const search = req.query.search;
 
 	try {
 		if (id) {
@@ -121,10 +122,18 @@ export const getUser = async (req, res) => {
 		let users;
 		if (other_users) {
 			users = await User.find({ isStaff: false, isAdmin: false });
-		} else if (is_staff) {
+		} else if (isStaff) {
 			users = await User.find({ isStaff: true, isAdmin: false });
-		} else if (is_admin) {
+		} else if (isAdmin) {
 			users = await User.find({ isAdmin: true, isStaff: false });
+		} else if (search) {
+			users = await User.find({
+				$or: [
+					{ name: { $regex: search, $options: 'i' } },
+					{ email: { $regex: search, $options: 'i' } },
+					{ enrollment: { $regex: search, $options: 'i' } },
+				],
+			});
 		} else {
 			users = await User.find({});
 		}

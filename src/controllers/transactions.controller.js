@@ -1,6 +1,7 @@
 import Transaction from '../models/transactions.model.js';
 import moment from 'moment';
 
+// Get transactions, with optional user filter and sorted by creation date
 export const getTransactions = async (req, res) => {
 	const userId = req.query.user_id;
 
@@ -8,20 +9,21 @@ export const getTransactions = async (req, res) => {
 		const transactions = userId
 			? await Transaction.find({ userId: userId })
 					.populate('couponCategoryId')
-					.sort({ createdAt: -1 })
+					.sort({ createdAt: -1 }) // Sorting by 'createdAt'
 			: await Transaction.find({
-					created_at: { $gte: moment().subtract(30, 'days').toDate() },
+					createdAt: { $gte: moment().subtract(30, 'days').toDate() },
 				})
 					.populate('couponCategoryId')
-					.sort({ created_at: -1 });
+					.sort({ createdAt: -1 }); // Sorting by 'createdAt'
 
-		res.status(200).json(transactions );
+		res.status(200).json(transactions);
 	} catch (error) {
 		console.log(error);
 		res.status(500).json({ error: error.message });
 	}
 };
 
+// Get daily transaction statistics
 export const getTransactionStats = async (req, res) => {
 	let { from, to } = req.query;
 	if (!from || !to) {
@@ -33,7 +35,7 @@ export const getTransactionStats = async (req, res) => {
 		const transactions = await Transaction.aggregate([
 			{
 				$match: {
-					created_at: {
+					createdAt: {
 						$gte: new Date(from),
 						$lte: new Date(to),
 					},
@@ -41,7 +43,7 @@ export const getTransactionStats = async (req, res) => {
 			},
 			{
 				$group: {
-					_id: { $dateToString: { format: '%Y-%m-%d', date: '$created_at' } },
+					_id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
 					transactions: { $sum: 1 },
 				},
 			},
@@ -71,27 +73,33 @@ export const getTransactionStats = async (req, res) => {
 	}
 };
 
+// Get daily revenue statistics
 export const getRevenueStats = async (req, res) => {
 	let { from, to } = req.query;
+
 	if (!from || !to) {
 		to = moment().format('YYYY-MM-DD');
-		from = moment().subtract(30, 'days').format('YYYY-MM-DD');
+		from = moment().subtract(7, 'days').format('YYYY-MM-DD');
 	}
 
 	try {
+		const startDate = new Date(from);
+		const endDate = new Date(to);
+		endDate.setHours(23, 59, 59, 999);
+
 		const revenue = await Transaction.aggregate([
 			{
 				$match: {
-					is_captured: true,
-					created_at: {
-						$gte: new Date(from),
-						$lte: new Date(to),
+					isCaptured: true,
+					createdAt: {
+						$gte: startDate,
+						$lte: endDate,
 					},
 				},
 			},
 			{
 				$group: {
-					_id: { $dateToString: { format: '%Y-%m-%d', date: '$created_at' } },
+					_id: { $dateToString: { format: '%Y-%m-%d', date: '$createdAt' } },
 					revenue: { $sum: '$amount' },
 				},
 			},
@@ -100,18 +108,16 @@ export const getRevenueStats = async (req, res) => {
 			},
 		]);
 
-		const daysMap = {};
-		revenue.forEach((r) => {
-			daysMap[r._id] = r.revenue;
-		});
+		const daysMap = revenue.reduce((map, r) => {
+			map[r._id] = r.revenue;
+			return map;
+		}, {});
 
 		const result = [];
-		for (
-			let d = moment().subtract(30, 'days');
-			!d.isAfter(moment());
-			d.add(1, 'days')
-		) {
-			const dateStr = d.format('YYYY-MM-DD');
+		for (let i = 0; i < 7; i++) {
+			const dateStr = moment()
+				.subtract(6 - i, 'days')
+				.format('YYYY-MM-DD');
 			result.push({ date: dateStr, revenue: daysMap[dateStr] || 0 });
 		}
 
@@ -121,6 +127,7 @@ export const getRevenueStats = async (req, res) => {
 	}
 };
 
+// Get transaction success rate (captured vs uncaptured)
 export const getTransactionSuccessRate = async (req, res) => {
 	try {
 		const successRate = await Transaction.aggregate([
@@ -128,10 +135,10 @@ export const getTransactionSuccessRate = async (req, res) => {
 				$group: {
 					_id: null,
 					captured: {
-						$sum: { $cond: [{ $eq: ['$is_captured', true] }, 1, 0] },
+						$sum: { $cond: [{ $eq: ['$isCaptured', true] }, 1, 0] }, // Updated 'isCaptured'
 					},
 					uncaptured: {
-						$sum: { $cond: [{ $eq: ['$is_captured', false] }, 1, 0] },
+						$sum: { $cond: [{ $eq: ['$isCaptured', false] }, 1, 0] },
 					},
 				},
 			},
@@ -145,21 +152,23 @@ export const getTransactionSuccessRate = async (req, res) => {
 	}
 };
 
+// Get revenue by coupon category
 export const getRevenueByCategory = async (req, res) => {
 	try {
 		const last30Days = moment().subtract(30, 'days').toDate();
+
 		const revenueByCategory = await Transaction.aggregate([
 			{
 				$match: {
-					is_captured: true,
-					created_at: { $gte: last30Days },
+					isCaptured: true,
+					createdAt: { $gte: last30Days },
 				},
 			},
 			{
 				$lookup: {
-					from: 'coupon_categories',
-					localField: 'coupon_category_id',
-					foreignField: 'id',
+					from: 'couponcategories',
+					localField: 'couponCategoryId',
+					foreignField: '_id',
 					as: 'category',
 				},
 			},
@@ -183,11 +192,12 @@ export const getRevenueByCategory = async (req, res) => {
 	}
 };
 
+// Get total revenue
 export const getTotalRevenue = async (req, res) => {
 	try {
 		const totalRevenue = await Transaction.aggregate([
 			{
-				$match: { is_captured: true },
+				$match: { isCaptured: true }, // Updated 'isCaptured'
 			},
 			{
 				$group: {

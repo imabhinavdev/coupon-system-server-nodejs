@@ -140,24 +140,42 @@ export const getCouponsUsedPerDay = async (req, res) => {
 // Get coupon stats by weekday
 export const getCouponStatsByWeekday = async (req, res) => {
 	const last30Days = new Date();
-	last30Days.setDate(last30Days.getDate() - 30); // Get date 30 days back from today
+	last30Days.setDate(last30Days.getDate() - 30);
 
 	try {
 		const couponStatsByWeekday = await Coupon.aggregate([
 			{
 				$match: {
-					created_at: { $gte: last30Days },
+					createdAt: { $gte: last30Days },
+					createdAt: { $ne: null }, // Ensure that createdAt is not null
 				},
 			},
 			{
+				$lookup: {
+					from: 'transactions',
+					localField: 'transactionId',
+					foreignField: '_id',
+					as: 'transaction',
+				},
+			},
+			{
+				$unwind: '$transaction',
+			},
+			{
 				$group: {
-					_id: { $dayOfWeek: '$created_at' }, // Group by weekday (1 = Sunday, 7 = Saturday)
+					_id: { $dayOfWeek: '$createdAt' }, // Use createdAt for grouping
 					coupons_sold: { $sum: 1 },
-					revenue: { $sum: '$transaction.amount' },
+					revenue: { $sum: '$transaction.amount' }, // Summing revenue from transactions
 				},
 			},
 			{ $sort: { _id: 1 } },
 		]);
+
+		if (couponStatsByWeekday.length === 0) {
+			return res
+				.status(200)
+				.json({ message: 'No coupons found in the last 30 days' });
+		}
 
 		const response = {};
 		couponStatsByWeekday.forEach((stat) => {
