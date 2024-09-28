@@ -1,0 +1,134 @@
+import User from '../models/user.model.js';
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken';
+import { config } from '../config/configurations.js';
+
+export const signUp = async (req, res) => {
+	const { name, email, password, enrollment, phone } = req.body;
+
+	const requiredFields = ['name', 'email', 'password', 'phone'];
+	requiredFields.forEach((field) => {
+		if (!req.body[field]) {
+			return res.status(400).json({
+				error: `${field} is required`,
+			});
+		}
+	});
+
+	try {
+		const existingUser = await User.findOne({ email });
+		if (existingUser) {
+			return res.status(400).json({
+				error: 'Email already exists',
+			});
+		}
+
+		const user = await User.create({
+			name,
+			email,
+			password,
+			phone,
+		});
+
+		if (enrollment) {
+			user.enrollment = enrollment;
+		}
+
+		await user.save();
+
+		const token = user.generateToken();
+
+		res.cookie('token', token, {
+			maxAge: 3600 * 1000, // 1 hour
+			httpOnly: true,
+			sameSite: 'lax',
+		});
+
+		res.status(200).json({
+			message: 'User created successfully',
+			user: user.toJSON(),
+		});
+	} catch (error) {
+		res.status(500).json({
+			error: 'Error creating user',
+		});
+	}
+};
+
+// Login Function
+export const login = async (req, res) => {
+	const { email, password } = req.body;
+
+	if (!email || !password) {
+		return res.status(400).json({
+			error: 'All fields are required',
+		});
+	}
+
+	try {
+		const user = await User.findOne({ email });
+		if (!user) {
+			return res.status(400).json({
+				error: 'Invalid email',
+			});
+		}
+
+		if (!user.isActive) {
+			return res.status(400).json({
+				error: 'User is not active',
+			});
+		}
+
+		if (!user.isVerified) {
+			return res.status(400).json({
+				error: 'User is not verified',
+			});
+		}
+
+		const isPasswordValid = await user.comparePassword(password);
+		if (!isPasswordValid) {
+			return res.status(400).json({
+				error: 'Invalid password',
+			});
+		}
+
+		const token = user.generateToken();
+
+		res.cookie('token', token, {
+			maxAge: 3600 * 1000, // 1 hour
+			httpOnly: true,
+			sameSite: 'lax',
+		});
+
+		res.status(200).json({
+			message: 'Login successful',
+			user: {
+				...user.toJSON(),
+				token,
+			},
+		});
+	} catch (error) {
+		res.status(500).json({
+			error: 'Error logging in',
+		});
+	}
+};
+
+export const whoAmI = (req, res) => {
+	const user = req.user; // Assuming user is already set by middleware
+	res.status(200).json({
+		user,
+	});
+};
+
+export const logout = (req, res) => {
+	res.cookie('token', '', {
+		maxAge: 3600 * 1000, // 1 hour
+		httpOnly: true,
+		sameSite: 'lax',
+	});
+
+	res.status(200).json({
+		message: 'Logged out successfully',
+	});
+};
