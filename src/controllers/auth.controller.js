@@ -130,7 +130,7 @@ export const whoAmI = (req, res) => {
 
 export const logout = (req, res) => {
 	res.cookie('token', '', {
-		maxAge: 3600 * 1000, // 1 hour
+		maxAge: -1,
 		httpOnly: true,
 		sameSite: 'lax',
 	});
