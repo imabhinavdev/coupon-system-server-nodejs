@@ -40,6 +40,10 @@ app.use('/api/v1/transactions', transactionRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/coupon-category', couponCategoryRoutes);
 
-app.listen(process.env.PORT, () => {
-	console.log(`Server is running on http://localhost:${process.env.PORT}`);
-});
+// app.listen(process.env.PORT, () => {
+// 	console.log(`Server is running on http://localhost:${process.env.PORT}`);
+// });
+
+export default (req, res) => {
+	app(req, res);
+};

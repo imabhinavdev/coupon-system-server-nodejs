@@ -31,7 +31,6 @@ export const generateOrder = async (req, res) => {
 		});
 	}
 
-
 	const receipt = randomUUID();
 	const data = {
 		amount: price * 100,
