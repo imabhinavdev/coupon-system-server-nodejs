@@ -1,19 +1,17 @@
 import User from '../models/user.model.js';
-import bcrypt from 'bcrypt';
-import jwt from 'jsonwebtoken';
-import { config } from '../config/configurations.js';
 
 export const signUp = async (req, res) => {
-	const { name, email, password, enrollment, phone } = req.body;
+	const { name, email, password, enrollment, phone } = await req.body;
 
 	const requiredFields = ['name', 'email', 'password', 'phone'];
-	requiredFields.forEach((field) => {
+
+	for (const field of requiredFields) {
 		if (!req.body[field]) {
 			return res.status(400).json({
 				error: `${field} is required`,
 			});
 		}
-	});
+	}
 
 	try {
 		const existingUser = await User.findOne({ email });
@@ -49,7 +47,7 @@ export const signUp = async (req, res) => {
 			user: user.toJSON(),
 		});
 	} catch (error) {
-		res.status(500).json({
+		return res.status(500).json({
 			error: 'Error creating user',
 		});
 	}
@@ -75,13 +73,13 @@ export const login = async (req, res) => {
 
 		if (!user.isActive) {
 			return res.status(400).json({
-				error: 'User is not active',
+				error: 'Acount is not deactivated',
 			});
 		}
 
 		if (!user.isVerified) {
 			return res.status(400).json({
-				error: 'User is not verified',
+				error: 'Account is not verified',
 			});
 		}
 
@@ -92,13 +90,22 @@ export const login = async (req, res) => {
 			});
 		}
 
-		const token = user.generateToken();
+		// const token = user.generateToken();
+		// res.cookie('token', token, {
+		// 	maxAge: 3600 * 1000, // 1 hour
+		// 	httpOnly: true,
+		// 	sameSite: 'none',
+		// });
 
-		res.cookie('token', token, {
-			maxAge: 3600 * 1000, // 1 hour
+		const token = await user.generateToken();
+
+		const options = {
+			expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
 			httpOnly: true,
-			sameSite: 'lax',
-		});
+			secure: process.env.NODE_ENV === 'production' ? true : false,
+		};
+
+		res.cookie('token', token, options);
 
 		res.status(200).json({
 			message: 'Login successful',
@@ -115,7 +122,7 @@ export const login = async (req, res) => {
 };
 
 export const whoAmI = (req, res) => {
-	const user = req.user; // Assuming user is already set by middleware
+	const user = req.user;
 	res.status(200).json({
 		user,
 	});

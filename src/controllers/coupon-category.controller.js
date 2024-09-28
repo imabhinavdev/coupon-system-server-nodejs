@@ -38,23 +38,19 @@ export const getCouponCategory = async (req, res) => {
 		let couponCategories;
 
 		if (id) {
-			const couponCategory = await CouponCategory.findByPk(id);
+			const couponCategory = await CouponCategory.findById(id);
 			return res.status(200).json({
 				message: 'Coupon category fetched successfully',
 				coupon_category: couponCategory,
 			});
 		}
 
-		if (isActive === 'true') {
-			couponCategories = await CouponCategory.findAll({
-				where: { is_active: true },
-			});
-		} else if (isActive === 'false') {
-			couponCategories = await CouponCategory.findAll({
-				where: { is_active: false },
-			});
+		if (isActive === true) {
+			couponCategories = await CouponCategory.find({ is_active: true });
+		} else if (isActive === false) {
+			couponCategories = await CouponCategory.find({ is_active: false });
 		} else {
-			couponCategories = await CouponCategory.findAll();
+			couponCategories = await CouponCategory.find();
 		}
 
 		res.status(200).json({
@@ -72,17 +68,27 @@ export const getCouponCategory = async (req, res) => {
 export const updateCouponCategory = async (req, res) => {
 	try {
 		const { id } = req.params;
+		const { name, price, isActive } = await req.body;
+		const requiredFields = ['name', 'price', 'isActive'];
+		requiredFields.forEach((field) => {
+			if (req.body[field] === undefined || req.body[field] === '') {
+				return res.status(400).json({ message: `${field} is required` });
+			}
+		});
 
 		if (!id) {
 			return res.status(400).json({ message: 'id is required' });
 		}
 
-		const couponCategory = await CouponCategory.findByPk(id);
+		const couponCategory = await CouponCategory.findByIdAndUpdate(id, {
+			name,
+			price,
+			isActive,
+		});
 		if (!couponCategory) {
 			return res.status(404).json({ message: 'Coupon category not found' });
 		}
 
-		await couponCategory.update(req.body);
 		res.status(200).json({
 			message: 'Coupon category updated successfully',
 			coupon_category: couponCategory,
@@ -103,12 +109,11 @@ export const deleteCouponCategory = async (req, res) => {
 			return res.status(400).json({ message: 'id is required' });
 		}
 
-		const couponCategory = await CouponCategory.findByPk(id);
+		const couponCategory = await CouponCategory.findByIdAndDelete(id);
 		if (!couponCategory) {
 			return res.status(404).json({ message: 'Coupon category not found' });
 		}
 
-		await couponCategory.destroy();
 		res.status(200).json({ message: 'Coupon category deleted successfully' });
 	} catch (err) {
 		res.status(500).json({

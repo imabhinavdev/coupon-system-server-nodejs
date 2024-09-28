@@ -6,17 +6,18 @@ export const getTransactions = async (req, res) => {
 
 	try {
 		const transactions = userId
-			? await Transaction.find({ user_id: userId })
-					.populate('CouponCategory')
-					.sort({ created_at: -1 })
+			? await Transaction.find({ userId: userId })
+					.populate('couponCategoryId')
+					.sort({ createdAt: -1 })
 			: await Transaction.find({
 					created_at: { $gte: moment().subtract(30, 'days').toDate() },
 				})
-					.populate('CouponCategory')
+					.populate('couponCategoryId')
 					.sort({ created_at: -1 });
 
-		res.status(200).json({ transactions });
+		res.status(200).json(transactions );
 	} catch (error) {
+		console.log(error);
 		res.status(500).json({ error: error.message });
 	}
 };

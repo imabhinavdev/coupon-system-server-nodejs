@@ -9,13 +9,13 @@ export const getCoupons = async (req, res) => {
 		let query = {};
 
 		if (isUsed) {
-			query.is_used = isUsed === 'true'; // Convert string to boolean
+			query.isUsed = isUsed;
 		}
 		if (userId) {
-			query.user_id = userId;
+			query.userId = userId;
 		}
 
-		const coupons = await Coupon.find(query).populate('CouponCategory');
+		const coupons = await Coupon.find(query).populate('couponCategoryId');
 
 		res.status(200).json({ coupons });
 	} catch (error) {
@@ -33,12 +33,12 @@ export const verifyCoupon = async (req, res) => {
 		if (!coupon) {
 			return res.status(404).json({ message: 'Coupon not found' });
 		}
-		if (coupon.is_used) {
+		if (coupon.isUsed) {
 			return res.status(400).json({ message: 'Coupon already used' });
 		}
 
 		// Make is_used true
-		coupon.is_used = true;
+		coupon.isUsed = true;
 		await coupon.save();
 		res.status(200).json({ message: 'Coupon verified successfully' });
 	} catch (error) {

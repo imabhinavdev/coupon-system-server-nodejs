@@ -4,6 +4,6 @@ import { Router } from 'express';
 const router = Router();
 
 router.post('/order', C.generateOrder);
-router.post('/verify/:id', C.verifySignature);
+router.post('/verify', C.verifySignature);
 
 export default router;

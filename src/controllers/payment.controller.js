@@ -4,6 +4,8 @@ import Razorpay from 'razorpay'; // Assuming Razorpay is set up correctly
 import dotenv from 'dotenv';
 import { config } from '../config/configurations.js';
 import { randomUUID } from 'crypto';
+import crypto from 'crypto';
+import Coupon from '../models/coupon.model.js';
 dotenv.config();
 
 const razorpayInstance = new Razorpay({
@@ -29,7 +31,6 @@ export const generateOrder = async (req, res) => {
 		});
 	}
 
-	console.log('Coupon category:', couponCategory);
 
 	const receipt = randomUUID();
 	const data = {
@@ -40,7 +41,6 @@ export const generateOrder = async (req, res) => {
 
 	try {
 		const order = await razorpayInstance.orders.create(data);
-		console.log('Order created:', order);
 
 		// Create a new transaction
 		const transaction = await Transaction.create({
@@ -76,7 +76,6 @@ export const verifySignature = async (req, res) => {
 		transaction_id,
 	} = req.body;
 
-	// Validate input
 	if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
 		return res.status(400).json({
 			message:
@@ -86,8 +85,6 @@ export const verifySignature = async (req, res) => {
 
 	const secret = process.env.RAZORPAY_KEY_SECRET;
 
-	// Verify signature
-	const crypto = require('crypto');
 	const payload = `${razorpay_order_id}|${razorpay_payment_id}`;
 	const expectedSignature = crypto
 		.createHmac('sha256', secret)
@@ -102,7 +99,6 @@ export const verifySignature = async (req, res) => {
 		});
 	}
 
-	// Find the transaction
 	const transaction = await Transaction.findById(transaction_id);
 	if (!transaction) {
 		return res.status(404).json({
@@ -110,14 +106,12 @@ export const verifySignature = async (req, res) => {
 		});
 	}
 
-	// Update the transaction
 	transaction.signature = razorpay_signature;
 	transaction.paymentId = razorpay_payment_id;
 	transaction.isCaptured = true;
 
 	await transaction.save();
 
-	// Create a new coupon
 	const currentDay = new Date().toLocaleString('en-US', { weekday: 'long' });
 	const newCoupon = await Coupon.create({
 		userId: transaction.userId,
@@ -126,19 +120,17 @@ export const verifySignature = async (req, res) => {
 		day: currentDay,
 	});
 
-	// Preload related CouponCategory
 	const couponWithDetails = await Coupon.findById(newCoupon._id).populate(
-		'couponCategory',
+		'couponCategoryId',
 	);
 
-	// Send the response excluding the User details
 	return res.status(200).json({
 		message: 'Coupon generated successfully',
 		data: {
 			id: couponWithDetails._id,
-			coupon_category_id: couponWithDetails.couponCategory._id,
-			coupon_category_name: couponWithDetails.couponCategory.name,
-			coupon_category_price: couponWithDetails.couponCategory.price,
+			coupon_category_id: couponWithDetails.couponCategoryId._id,
+			coupon_category_name: couponWithDetails.couponCategoryId.name,
+			coupon_category_price: couponWithDetails.couponCategoryId.price,
 			is_used: couponWithDetails.isUsed,
 			day: couponWithDetails.day,
 			transaction_id: couponWithDetails.transactionId,

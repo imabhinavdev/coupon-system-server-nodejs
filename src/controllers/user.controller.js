@@ -7,13 +7,13 @@ export const createUser = async (req, res) => {
 		password,
 		enrollment,
 		phone,
-		is_active,
-		is_admin,
-		is_verified,
-		is_staff,
+		isActive,
+		isAdmin,
+		isVerified,
+		isStaff,
 	} = req.body;
 
-	if (!name || !email || !password || !enrollment || !phone) {
+	if (!name || !email || !password || !phone) {
 		return res.status(400).json({ error: 'All fields are required' });
 	}
 
@@ -29,10 +29,10 @@ export const createUser = async (req, res) => {
 			password,
 			enrollment,
 			phone,
-			isActive: is_active === 'true',
-			isStaff: is_staff === 'true',
-			isAdmin: is_admin === 'true',
-			isVerified: is_verified === 'true',
+			isActive: isActive === true,
+			isStaff: isStaff === true,
+			isAdmin: isAdmin === true,
+			isVerified: isVerified === true,
 		});
 
 		await user.save();
@@ -49,7 +49,7 @@ export const updateUser = async (req, res) => {
 	const { name, email, enrollment, phone, isActive, isAdmin, isVerified } =
 		req.body;
 
-	if (!name || !email || !enrollment || !phone) {
+	if (!name || !email || !phone) {
 		return res.status(400).json({ error: 'All fields are required' });
 	}
 
@@ -64,9 +64,9 @@ export const updateUser = async (req, res) => {
 		user.enrollment = enrollment;
 		user.phone = phone;
 
-		if (isActive !== undefined) user.isActive = isActive === 'true';
-		if (isAdmin !== undefined) user.isAdmin = isAdmin === 'true';
-		if (isVerified !== undefined) user.isVerified = isVerified === 'true';
+		if (isActive !== undefined) user.isActive = isActive === true;
+		if (isAdmin !== undefined) user.isAdmin = isAdmin === true;
+		if (isVerified !== undefined) user.isVerified = isVerified === true;
 
 		await user.save();
 
@@ -147,6 +147,7 @@ export const getUserActiveStatus = async (req, res) => {
 			},
 		});
 	} catch (err) {
+		console.log(err);
 		res.status(500).json({ error: 'Error retrieving active status' });
 	}
 };
