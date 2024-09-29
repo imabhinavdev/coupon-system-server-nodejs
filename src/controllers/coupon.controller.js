@@ -27,6 +27,7 @@ export const getCoupons = async (req, res) => {
 // Verify a coupon
 export const verifyCoupon = async (req, res) => {
 	const id = req.params.id;
+	const { userId } = req.body;
 
 	try {
 		const coupon = await Coupon.findById(id);
@@ -39,6 +40,7 @@ export const verifyCoupon = async (req, res) => {
 
 		// Make is_used true
 		coupon.isUsed = true;
+		coupon.scannedBy = userId;
 		await coupon.save();
 		res.status(200).json({ message: 'Coupon verified successfully' });
 	} catch (error) {
@@ -191,8 +193,6 @@ export const getCouponStatsByWeekday = async (req, res) => {
 		res.status(500).json({ message: 'Internal Server Error' });
 	}
 };
-
-
 
 // send coupons of today which are used
 export const getTodaysUsedCoupons = async (req, res) => {

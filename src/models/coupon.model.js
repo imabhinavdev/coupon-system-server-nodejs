@@ -15,6 +15,11 @@ const couponSchema = new Schema({
 		type: Boolean,
 		default: false,
 	},
+	scannedBy: {
+		type: Schema.Types.ObjectId,
+		ref: 'User',
+	},
+
 	day: {
 		type: String,
 	},
