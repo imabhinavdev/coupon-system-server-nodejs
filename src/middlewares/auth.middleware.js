@@ -4,6 +4,7 @@ import { config } from '../config/configurations.js';
 export const authMiddleware = (req, res, next) => {
 	const token = req.cookies?.token;
 	if (!token) {
+		res.clearCookie('token');
 		return res.status(401).json({ error: 'Unauthorized' });
 	}
 	jwt.verify(token, config.JWT_SECRET, async (err, claims) => {
@@ -13,6 +14,14 @@ export const authMiddleware = (req, res, next) => {
 		}
 		const userId = claims._id;
 		const user = await User.findById(userId);
+		if (!user) {
+			res.clearCookie('token');
+			return res.status(401).json({ error: 'Unauthorized' });
+		}
+		if (!user.isActive || !user.isVerified) {
+			res.clearCookie('token');
+			return res.status(401).json({ error: 'Unauthorized' });
+		}
 		req.user = user;
 
 		next();
