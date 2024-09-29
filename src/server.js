@@ -44,6 +44,7 @@ app.use('/api/v1/coupon-category', couponCategoryRoutes);
 // 	console.log(`Server is running on http://localhost:${process.env.PORT}`);
 // });
 
+
 export default (req, res) => {
 	app(req, res);
 };
