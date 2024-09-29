@@ -40,7 +40,7 @@ export const verifyCoupon = async (req, res) => {
 
 		// Make is_used true
 		coupon.isUsed = true;
-		coupon.scannedBy = userId;
+		coupon.scannedBy = scannedBy;
 		await coupon.save();
 		res.status(200).json({ message: 'Coupon verified successfully' });
 	} catch (error) {

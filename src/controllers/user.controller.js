@@ -47,8 +47,16 @@ export const createUser = async (req, res) => {
 
 export const updateUser = async (req, res) => {
 	const id = req.params.id;
-	const { name, email, enrollment, phone, isActive, isAdmin, isVerified,isStaff } =
-		req.body;
+	const {
+		name,
+		email,
+		enrollment,
+		phone,
+		isActive,
+		isAdmin,
+		isVerified,
+		isStaff,
+	} = req.body;
 
 	if (!name || !email || !phone) {
 		return res.status(400).json({ error: 'All fields are required' });
@@ -178,7 +186,6 @@ export const getNewUsersStats = async (req, res) => {
 		res.status(500).json({ error: 'Error retrieving new users statistics' });
 	}
 };
-
 export const getUserAllDetails = async (req, res) => {
 	const id = req.params.id;
 
@@ -190,8 +197,16 @@ export const getUserAllDetails = async (req, res) => {
 
 		user.password = '';
 
-		const transactions = await Transactions.find({ userId: id });
-		const orders = await Coupon.find({ userId: id });
+		const transactions = await Transactions.find({ userId: id })
+			.populate('couponCategoryId', 'name')
+			.sort({
+				createdAt: -1,
+			});
+
+		const orders = await Coupon.find({ userId: id })
+			.populate('scannedBy', 'name email')
+			.populate('couponCategoryId', 'name')
+			.sort({ createdAt: -1 });
 
 		res.status(200).json({ user, transactions, orders });
 	} catch (err) {
