@@ -9,5 +9,6 @@ router.put('/:id', C.updateUser);
 router.delete('/:id', C.deleteUser);
 router.get('/active-status', C.getUserActiveStatus);
 router.get('/stats/new-users', C.getNewUsersStats);
+router.get('/all-details/:id', C.getUserAllDetails);
 
 export default router;

@@ -42,7 +42,7 @@ const userSchema = new Schema({
 	isStaff: {
 		type: Boolean,
 		default: false,
-	},	
+	},
 	forgotOTP: {
 		type: String,
 		default: null,
@@ -136,7 +136,7 @@ userSchema.methods.sendOTP = async function () {
 	}
 };
 
-userSchema.methods.compareOTP = function (otp) {
+userSchema.methods.compareOTPForVerification = function (otp) {
 	const verified = otp === this.forgotOTP && this.forgotOTPExpiry > Date.now();
 	if (verified) {
 		this.forgotOTP = null;
@@ -145,6 +145,10 @@ userSchema.methods.compareOTP = function (otp) {
 	this.isVerified = verified;
 	this.save();
 	return verified;
+};
+
+userSchema.methods.compareOTP = function (otp) {
+	return otp === this.forgotOTP && this.forgotOTPExpiry > Date.now();
 };
 const User = mongoose.model('User', userSchema);
 

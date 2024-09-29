@@ -1,5 +1,6 @@
 import User from '../models/user.model.js';
-
+import Transactions from '../models/transactions.model.js';
+import Coupon from '../models/coupon.model.js';
 export const createUser = async (req, res) => {
 	const {
 		name,
@@ -46,7 +47,7 @@ export const createUser = async (req, res) => {
 
 export const updateUser = async (req, res) => {
 	const id = req.params.id;
-	const { name, email, enrollment, phone, isActive, isAdmin, isVerified } =
+	const { name, email, enrollment, phone, isActive, isAdmin, isVerified,isStaff } =
 		req.body;
 
 	if (!name || !email || !phone) {
@@ -63,10 +64,10 @@ export const updateUser = async (req, res) => {
 		user.email = email;
 		user.enrollment = enrollment;
 		user.phone = phone;
-
-		if (isActive !== undefined) user.isActive = isActive === true;
-		if (isAdmin !== undefined) user.isAdmin = isAdmin === true;
-		if (isVerified !== undefined) user.isVerified = isVerified === true;
+		user.isActive = isActive;
+		user.isAdmin = isAdmin;
+		user.isVerified = isVerified;
+		user.isStaff = isStaff;
 
 		await user.save();
 
@@ -175,5 +176,25 @@ export const getNewUsersStats = async (req, res) => {
 		res.status(200).json({ new_users: newUsersCount, days });
 	} catch (err) {
 		res.status(500).json({ error: 'Error retrieving new users statistics' });
+	}
+};
+
+export const getUserAllDetails = async (req, res) => {
+	const id = req.params.id;
+
+	try {
+		const user = await User.findById(id);
+		if (!user) {
+			return res.status(400).json({ error: 'User not found' });
+		}
+
+		user.password = '';
+
+		const transactions = await Transactions.find({ userId: id });
+		const orders = await Coupon.find({ userId: id });
+
+		res.status(200).json({ user, transactions, orders });
+	} catch (err) {
+		res.status(500).json({ error: 'Error retrieving user details' });
 	}
 };

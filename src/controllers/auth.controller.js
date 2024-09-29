@@ -1,3 +1,4 @@
+import e from 'express';
 import User from '../models/user.model.js';
 
 export const signUp = async (req, res) => {
@@ -84,7 +85,7 @@ export const verifyOTP = async (req, res) => {
 			});
 		}
 
-		const isVerified = await user.compareOTP(otp);
+		const isVerified = await user.compareOTPForVerification(otp);
 		if (!isVerified) {
 			return res.status(400).json({
 				message: 'Invalid OTP',
@@ -194,4 +195,78 @@ export const logout = (req, res) => {
 	res.status(200).json({
 		message: 'Logged out successfully',
 	});
+};
+
+export const ForgotOTPEmail = async (req, res) => {
+	const { email } = req.body;
+
+	if (!email) {
+		return res.status(400).json({
+			error: 'Email is required',
+		});
+	}
+
+	try {
+		const user = await User.findOne({ email });
+
+		if (!user) {
+			return res.status(400).json({
+				error: 'Invalid email',
+			});
+		}
+
+		const otpSend = await user.sendOTP();
+		if (!otpSend) {
+			return res.status(500).json({
+				error: 'Error sending OTP',
+			});
+		}
+
+		res.status(200).json({
+			message: 'OTP sent to email',
+		});
+	} catch (error) {
+		return res.status(500).json({
+			error: 'Error sending OTP',
+		});
+	}
+};
+
+export const ResetPassword = async (req, res) => {
+	const { email, otp, password } = req.body;
+
+	if (!email || !otp || !password) {
+		return res.status(400).json({
+			error: 'All fields are required',
+		});
+	}
+
+	try {
+		const user = await User.findOne({ email });
+
+		if (!user) {
+			return res.status(400).json({
+				error: 'Invalid email',
+			});
+		}
+
+		const isVerified = await user.compareOTP(otp);
+		if (!isVerified) {
+			return res.status(400).json({
+				error: 'Invalid OTP',
+			});
+		}
+
+		user.password = password;
+		await user.save();
+
+		res.status(200).json({
+			message: 'Password reset successfully',
+		});
+	} catch (error) {
+		console.log(error);
+		return res.status(500).json({
+			error: 'Error resetting password',
+		});
+	}
 };
