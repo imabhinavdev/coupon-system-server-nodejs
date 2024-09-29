@@ -6,6 +6,7 @@ const router = Router();
 
 router.post('/signUp', C.signUp);
 router.post('/login', C.login);
+router.post('/verify', C.verifyOTP);
 router.post('/logout', C.logout);
 router.get('/whoami', authMiddleware, C.whoAmI);
 

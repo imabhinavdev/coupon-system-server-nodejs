@@ -2,6 +2,7 @@ import mongoose, { Schema } from 'mongoose';
 import bcrypt from 'bcrypt';
 import { config } from '../config/configurations.js';
 import jwt from 'jsonwebtoken';
+import { sendMail } from '../utils/mailer.util.js';
 const userSchema = new Schema({
 	name: {
 		type: String,
@@ -36,12 +37,12 @@ const userSchema = new Schema({
 	},
 	isVerified: {
 		type: Boolean,
-		default: true,
+		default: false,
 	},
 	isStaff: {
 		type: Boolean,
 		default: false,
-	},
+	},	
 	forgotOTP: {
 		type: String,
 		default: null,
@@ -115,6 +116,36 @@ userSchema.methods.generateToken = function () {
 	);
 };
 
+userSchema.methods.sendOTP = async function () {
+	this.forgotOTP = Math.floor(100000 + Math.random() * 900000).toString();
+	this.forgotOTPExpiry = new Date(Date.now() + 10 * 60 * 1000);
+	await this.save();
+	try {
+		const result = await sendMail(
+			this.email,
+			'Coupon System OTP',
+			`Your OTP is ${this.forgotOTP} and will expire in 10 minutes`,
+		);
+		if (result) {
+			return true;
+		} else {
+			return false;
+		}
+	} catch (error) {
+		return false;
+	}
+};
+
+userSchema.methods.compareOTP = function (otp) {
+	const verified = otp === this.forgotOTP && this.forgotOTPExpiry > Date.now();
+	if (verified) {
+		this.forgotOTP = null;
+		this.forgotOTPExpiry = null;
+	}
+	this.isVerified = verified;
+	this.save();
+	return verified;
+};
 const User = mongoose.model('User', userSchema);
 
 export default User;

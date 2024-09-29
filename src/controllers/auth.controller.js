@@ -34,8 +34,64 @@ export const signUp = async (req, res) => {
 
 		await user.save();
 
-		const token = user.generateToken();
+		const otpSend = await user.sendOTP();
+		if (!otpSend) {
+			return res.status(500).json({
+				error: 'Error sending OTP',
+			});
+		}
 
+		res.status(200).json({
+			message: 'OTP sent to email',
+		});
+
+		// const token = user.generateToken();
+
+		// res.cookie('token', token, {
+		// 	maxAge: 3600 * 1000, // 1 hour
+		// 	httpOnly: true,
+		// 	sameSite: 'lax',
+		// });
+
+		// res.status(200).json({
+		// 	message: 'User created successfully',
+		// 	user: user.toJSON(),
+		// });
+	} catch (error) {
+		return res.status(500).json({
+			error: 'Error creating user',
+		});
+	}
+};
+
+export const verifyOTP = async (req, res) => {
+	const { email, otp } = req.body;
+
+	if (!email || !otp) {
+		return res.status(400).json({
+			error: 'All fields are required',
+		});
+	}
+
+	try {
+		const user = await User.findOne({
+			email,
+		});
+
+		if (!user) {
+			return res.status(400).json({
+				error: 'Invalid email',
+			});
+		}
+
+		const isVerified = await user.compareOTP(otp);
+		if (!isVerified) {
+			return res.status(400).json({
+				message: 'Invalid OTP',
+			});
+		}
+
+		const token = user.generateToken();
 		res.cookie('token', token, {
 			maxAge: 3600 * 1000, // 1 hour
 			httpOnly: true,
@@ -43,12 +99,12 @@ export const signUp = async (req, res) => {
 		});
 
 		res.status(200).json({
-			message: 'User created successfully',
+			message: 'OTP verified',
 			user: user.toJSON(),
 		});
 	} catch (error) {
 		return res.status(500).json({
-			error: 'Error creating user',
+			error: 'Error verifying OTP',
 		});
 	}
 };

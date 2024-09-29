@@ -191,3 +191,23 @@ export const getCouponStatsByWeekday = async (req, res) => {
 		res.status(500).json({ message: 'Internal Server Error' });
 	}
 };
+
+
+
+// send coupons of today which are used
+export const getTodaysUsedCoupons = async (req, res) => {
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+
+	try {
+		const usedCoupons = await Coupon.find({
+			isUsed: true,
+			updatedAt: { $gte: today },
+		});
+
+		res.status(200).json({ used_coupons: usedCoupons });
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ message: 'Internal Server Error' });
+	}
+};
