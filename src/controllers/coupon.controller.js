@@ -27,7 +27,7 @@ export const getCoupons = async (req, res) => {
 // Verify a coupon
 export const verifyCoupon = async (req, res) => {
 	const id = req.params.id;
-	const { userId } = req.body;
+	const { scannedBy } = req.body;
 
 	try {
 		const coupon = await Coupon.findById(id);
