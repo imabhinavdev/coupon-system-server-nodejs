@@ -53,6 +53,8 @@ export const verifyCoupon = async (req, res) => {
 export const assignCoupon = async (req, res) => {
 	try {
 		const { userId, couponCategoryId, noOfPerson } = req.body;
+		// get today's day like monday, tuesday etc
+		const day = new Date().getDay();
 
 		console.log(userId, couponCategoryId, noOfPerson);
 		Object.keys(req.body).forEach((key) => {
@@ -65,7 +67,7 @@ export const assignCoupon = async (req, res) => {
 			return res.status(404).json({ message: 'Coupon category not found' });
 		}
 
-		const coupon = Coupon.create({ userId, couponCategoryId, noOfPerson });
+		const coupon = Coupon.create({ day, userId, couponCategoryId, noOfPerson });
 
 		if (!coupon) {
 			return res.status(500).json({ message: 'Error assigning coupon' });
