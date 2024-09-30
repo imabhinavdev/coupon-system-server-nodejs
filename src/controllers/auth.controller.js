@@ -2,9 +2,9 @@ import e from 'express';
 import User from '../models/user.model.js';
 
 export const signUp = async (req, res) => {
-	const { name, email, password, enrollment, phone } = await req.body;
+	const { name, email, password, enrollment, phone, role } = await req.body;
 
-	const requiredFields = ['name', 'email', 'password', 'phone'];
+	const requiredFields = ['name', 'email', 'password', 'phone', '	'];
 
 	for (const field of requiredFields) {
 		if (!req.body[field]) {
@@ -27,6 +27,7 @@ export const signUp = async (req, res) => {
 			email,
 			password,
 			phone,
+			role,
 		});
 
 		if (enrollment) {
@@ -130,7 +131,7 @@ export const login = async (req, res) => {
 
 		if (!user.isActive) {
 			return res.status(400).json({
-				error: 'Acount is not deactivated',
+				error: 'Acount is deactivated',
 			});
 		}
 

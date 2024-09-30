@@ -23,9 +23,13 @@ const couponSchema = new Schema({
 	day: {
 		type: String,
 	},
+	noOfPerson: {
+		type: Number,
+		default: 1,
+		required: true,
+	},
 	transactionId: {
 		type: mongoose.Schema.Types.ObjectId,
-		required: true,
 		ref: 'Transaction',
 	},
 	createdAt: {

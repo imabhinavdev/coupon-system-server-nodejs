@@ -31,17 +31,14 @@ const userSchema = new Schema({
 		type: Boolean,
 		default: true,
 	},
-	isAdmin: {
-		type: Boolean,
-		default: false,
-	},
 	isVerified: {
 		type: Boolean,
 		default: false,
 	},
-	isStaff: {
-		type: Boolean,
-		default: false,
+	role: {
+		type: String,
+		enum: ['user', 'staff', 'admin', 'superadmin', 'faculty', 'other'],
+		default: 'user',
 	},
 	forgotOTP: {
 		type: String,
@@ -104,12 +101,11 @@ userSchema.methods.generateToken = function () {
 	return jwt.sign(
 		{
 			_id: this._id,
-			isAdmin: this.isAdmin,
-			isStaff: this.isStaff,
 			isVerified: this.isVerified,
 			isActive: this.isActive,
 			name: this.name,
 			email: this.email,
+			role: this.role,
 		},
 		config.JWT_SECRET,
 		{ expiresIn: '1d' },

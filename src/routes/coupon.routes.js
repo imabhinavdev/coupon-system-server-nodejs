@@ -9,5 +9,5 @@ router.get('/stats', C.getCouponStats);
 router.get('/users-per-category', C.getUsersPerCouponCategory);
 router.get('/used-per-day', C.getCouponsUsedPerDay);
 router.get('/used-by-weekdays', C.getCouponStatsByWeekday);
-
+router.post('/assign-coupon', C.assignCoupon);
 export default router;

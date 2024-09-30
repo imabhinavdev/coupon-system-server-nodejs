@@ -49,6 +49,35 @@ export const verifyCoupon = async (req, res) => {
 	}
 };
 
+// assign coupon to user from admin
+export const assignCoupon = async (req, res) => {
+	try {
+		const { userId, couponCategoryId, noOfPerson } = req.body;
+
+		console.log(userId, couponCategoryId, noOfPerson);
+		Object.keys(req.body).forEach((key) => {
+			if (!req.body[key]) {
+				return res.status(400).json({ message: `${key} is required` });
+			}
+		});
+		const couponCategory = await CouponCategory.findById(couponCategoryId);
+		if (!couponCategory) {
+			return res.status(404).json({ message: 'Coupon category not found' });
+		}
+
+		const coupon = Coupon.create({ userId, couponCategoryId, noOfPerson });
+
+		if (!coupon) {
+			return res.status(500).json({ message: 'Error assigning coupon' });
+		}
+
+		res.status(200).json({ message: 'Coupon assigned successfully' });
+	} catch (error) {
+		console.error(error);
+		res.status(500).json({ message: 'Internal Server Error' });
+	}
+};
+
 // Get coupon statistics
 export const getCouponStats = async (req, res) => {
 	try {

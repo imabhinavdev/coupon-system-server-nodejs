@@ -142,7 +142,7 @@ export const getUser = async (req, res) => {
 					{ email: { $regex: search, $options: 'i' } },
 					{ enrollment: { $regex: search, $options: 'i' } },
 				],
-			});
+			}).select('name email');
 		} else {
 			users = await User.find({});
 		}
