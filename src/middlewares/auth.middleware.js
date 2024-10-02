@@ -42,7 +42,7 @@ export const adminMiddleware = async (req, res, next) => {
 		if (!user) {
 			return res.status(401).json({ error: 'Unauthorized: User not found' });
 		}
-		if (!user.isAdmin || !user.isActive || !user.isVerified) {
+		if (!user.role==='admin' || !user.isActive || !user.isVerified) {
 			return res
 				.status(401)
 				.json({ error: 'Unauthorized: Admin access required' });

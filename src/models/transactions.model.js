@@ -37,6 +37,7 @@ const transactionSchema = new Schema({
 		type: Date,
 		default: Date.now,
 	},
+
 });
 
 transactionSchema.pre('save', function (next) {

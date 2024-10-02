@@ -9,9 +9,8 @@ export const createUser = async (req, res) => {
 		enrollment,
 		phone,
 		isActive,
-		isAdmin,
+		role,
 		isVerified,
-		isStaff,
 	} = req.body;
 
 	if (!name || !email || !password || !phone) {
@@ -31,8 +30,7 @@ export const createUser = async (req, res) => {
 			enrollment,
 			phone,
 			isActive: isActive === true,
-			isStaff: isStaff === true,
-			isAdmin: isAdmin === true,
+			role,
 			isVerified: isVerified === true,
 		});
 
@@ -47,16 +45,8 @@ export const createUser = async (req, res) => {
 
 export const updateUser = async (req, res) => {
 	const id = req.params.id;
-	const {
-		name,
-		email,
-		enrollment,
-		phone,
-		isActive,
-		isAdmin,
-		isVerified,
-		isStaff,
-	} = req.body;
+	const { name, email, enrollment, phone, isActive, isVerified, role } =
+		req.body;
 
 	if (!name || !email || !phone) {
 		return res.status(400).json({ error: 'All fields are required' });
@@ -73,10 +63,8 @@ export const updateUser = async (req, res) => {
 		user.enrollment = enrollment;
 		user.phone = phone;
 		user.isActive = isActive;
-		user.isAdmin = isAdmin;
 		user.isVerified = isVerified;
-		user.isStaff = isStaff;
-
+		user.role = role;
 		await user.save();
 
 		res.status(200).json({
@@ -86,8 +74,8 @@ export const updateUser = async (req, res) => {
 				name: user.name,
 				email: user.email,
 				isActive: user.isActive,
-				isAdmin: user.isAdmin,
 				isVerified: user.isVerified,
+				role: user.role,
 			},
 		});
 	} catch (err) {
@@ -130,11 +118,11 @@ export const getUser = async (req, res) => {
 
 		let users;
 		if (other_users) {
-			users = await User.find({ isStaff: false, isAdmin: false });
+			users = await User.find({ role: { $ne: ['admin', 'staff'] } });
 		} else if (isStaff) {
-			users = await User.find({ isStaff: true, isAdmin: false });
+			users = await User.find({ role: 'staff' });
 		} else if (isAdmin) {
-			users = await User.find({ isAdmin: true, isStaff: false });
+			users = await User.find({ role: 'admin' });
 		} else if (search) {
 			users = await User.find({
 				$or: [

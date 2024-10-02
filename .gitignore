@@ -21,6 +21,7 @@ lib-cov
 
 /src/server.js
 
+
 # Coverage directory used by tools like istanbul
 coverage
 *.lcov
