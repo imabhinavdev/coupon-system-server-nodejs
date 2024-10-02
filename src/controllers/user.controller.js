@@ -118,7 +118,9 @@ export const getUser = async (req, res) => {
 
 		let users;
 		if (other_users) {
-			users = await User.find({ role: { $ne: ['admin', 'staff'] } });
+			users = await User.find({
+				role: { $nin: ['admin', 'staff'] },
+			});
 		} else if (isStaff) {
 			users = await User.find({ role: 'staff' });
 		} else if (isAdmin) {

@@ -1,7 +1,8 @@
 import Transaction from '../models/transactions.model.js';
 import moment from 'moment';
-
-// Get transactions, with optional user filter and sorted by creation date
+import xlsx from 'xlsx';
+import Coupon from '../models/coupon.model.js';
+import User from '../models/user.model.js';
 export const getTransactions = async (req, res) => {
 	const userId = req.query.user_id;
 
@@ -212,5 +213,205 @@ export const getTotalRevenue = async (req, res) => {
 			.json({ total_revenue: totalRevenue[0]?.total_revenue || 0 });
 	} catch (error) {
 		res.status(500).json({ error: error.message });
+	}
+};
+
+export const generateReport = async (req, res) => {
+	try {
+		// Fetch Coupon Data
+		const coupons = await Coupon.find()
+			.populate('userId', 'name email')
+			.populate('couponCategoryId', 'name')
+			.populate('scannedBy', 'name email')
+			.populate('transactionId', 'orderId amount status');
+		console.log(coupons);
+
+		const couponData = coupons.map((coupon) => ({
+			'Coupon ID': coupon._id ? coupon._id.toString() : 'N/A',
+			'User Name': coupon.userId?.name || 'N/A',
+			'User Email': coupon.userId?.email || 'N/A',
+			'Coupon Category': coupon.couponCategoryId?.name || 'N/A',
+			'Is Used': coupon.isUsed,
+			'Scanned By': coupon.scannedBy?.name || 'N/A',
+			Day: coupon.day,
+			'Number of Persons': coupon.noOfPerson,
+			'Transaction ID': coupon.transactionId?.orderId || 'N/A',
+			'Transaction Amount': coupon.transactionId?.amount || 'N/A',
+			'Transaction Status': coupon.transactionId?.status || 'N/A',
+			'Created At': coupon.createdAt,
+			'Updated At': coupon.updatedAt,
+		}));
+
+		// Fetch Transaction Data
+		const transactions = await Transaction.find().populate(
+			'userId',
+			'name email',
+		);
+
+		const transactionData = transactions.map((transaction) => ({
+			'Transaction ID': transaction._id.toString(),
+			'User Name': transaction.userId?.name || 'N/A',
+			'User Email': transaction.userId?.email || 'N/A',
+			Amount: transaction.amount,
+			'Payment ID': transaction.paymentId || 'N/A',
+			'Order ID': transaction.orderId,
+			Status: transaction.status,
+			'Payment Mode': transaction.paymentMode,
+			'Created At': transaction.createdAt,
+			'Updated At': transaction.updatedAt,
+		}));
+
+		// Fetch Student Data with Aggregation
+		// Fetch Student Data with Aggregation
+		const students = await User.aggregate([
+			{ $match: { role: 'user' } },
+			{
+				$lookup: {
+					from: 'transactions',
+					localField: '_id',
+					foreignField: 'userId',
+					as: 'transactions',
+				},
+			},
+			{
+				$project: {
+					'Student ID': { $toString: '$_id' }, // Ensure it's a string
+					'Student Name': '$name',
+					'Student Email': '$email',
+					'Enrollment Number': '$enrollment',
+					'Number of Transactions': { $size: '$transactions' },
+					'Number of Failed Transactions': {
+						$size: {
+							$filter: {
+								input: '$transactions',
+								as: 'transaction',
+								cond: { $eq: ['$$transaction.status', 'failed'] },
+							},
+						},
+					},
+					'Total Amount Generated': {
+						$sum: {
+							$map: {
+								input: {
+									$filter: {
+										input: '$transactions',
+										as: 'transaction',
+										cond: { $eq: ['$$transaction.status', 'success'] },
+									},
+								},
+								as: 'transaction',
+								in: '$$transaction.amount', // Extract the amount
+							},
+						},
+					},
+					Phone: '$phone',
+					'Created At': '$createdAt',
+					'Updated At': '$updatedAt',
+				},
+			},
+		]);
+
+		const studentData = students.map((student) => ({
+			'Student ID': student['Student ID'],
+			'Student Name': student['Student Name'],
+			'Student Email': student['Student Email'],
+			'Enrollment Number': student['Enrollment Number'],
+			'Number of Transactions': student['Number of Transactions'],
+			'Number of Failed Transactions': student['Number of Failed Transactions'],
+			'Total Amount Generated': student['Total Amount Generated'],
+			Phone: student['Phone'],
+			'Created At': student['Created At'],
+			'Updated At': student['Updated At'],
+		}));
+
+		const faculty = await User.aggregate([
+			{ $match: { role: 'faculty' } },
+			{
+				$lookup: {
+					from: 'transactions',
+					localField: '_id',
+					foreignField: 'scannedBy', // Assuming scannedBy is the faculty field in Transaction
+					as: 'transactions',
+				},
+			},
+			{
+				$project: {
+					'Faculty ID': { $toString: '$_id' },
+					'Faculty Name': '$name',
+					'Faculty Email': '$email',
+					'Number of Transactions': { $size: '$transactions' },
+					'Number of Failed Transactions': {
+						$size: {
+							$filter: {
+								input: '$transactions',
+								as: 'transaction',
+								cond: { $eq: ['$$transaction.status', 'failed'] },
+							},
+						},
+					},
+					'Total Amount Generated': {
+						$sum: {
+							$filter: {
+								input: '$transactions',
+								as: 'transaction',
+								cond: { $eq: ['$$transaction.status', 'success'] },
+							},
+						},
+					},
+					Role: '$role',
+					'Created At': '$createdAt',
+					'Updated At': '$updatedAt',
+				},
+			},
+		]);
+
+		const facultyData = faculty.map((facultyMember) => ({
+			'Faculty ID': facultyMember['Faculty ID'],
+			'Faculty Name': facultyMember['Faculty Name'],
+			'Faculty Email': facultyMember['Faculty Email'],
+			'Number of Transactions': facultyMember['Number of Transactions'],
+			'Number of Failed Transactions':
+				facultyMember['Number of Failed Transactions'],
+			'Total Amount Generated': facultyMember['Total Amount Generated'],
+			Role: facultyMember['Role'],
+			'Created At': facultyMember['Created At'],
+			'Updated At': facultyMember['Updated At'],
+		}));
+
+		// Create a new workbook
+		const workbook = xlsx.utils.book_new();
+
+		// Create worksheets
+		const couponWorksheet = xlsx.utils.json_to_sheet(couponData);
+		const transactionWorksheet = xlsx.utils.json_to_sheet(transactionData);
+		const studentWorksheet = xlsx.utils.json_to_sheet(studentData);
+		const facultyWorksheet = xlsx.utils.json_to_sheet(facultyData);
+
+		// Append sheets to the workbook
+		xlsx.utils.book_append_sheet(workbook, couponWorksheet, 'Coupons');
+		xlsx.utils.book_append_sheet(
+			workbook,
+			transactionWorksheet,
+			'Transactions',
+		);
+		xlsx.utils.book_append_sheet(workbook, studentWorksheet, 'Students');
+		xlsx.utils.book_append_sheet(workbook, facultyWorksheet, 'Faculty');
+
+		// Generate buffer
+		const excelBuffer = xlsx.write(workbook, {
+			bookType: 'xlsx',
+			type: 'buffer',
+		});
+
+		// Set headers and send file
+		res.setHeader('Content-Disposition', 'attachment; filename=report.xlsx');
+		res.setHeader(
+			'Content-Type',
+			'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+		);
+		res.send(excelBuffer);
+	} catch (error) {
+		console.error(error);
+		res.status(500).send('Error generating report');
 	}
 };

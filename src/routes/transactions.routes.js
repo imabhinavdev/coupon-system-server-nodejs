@@ -10,5 +10,6 @@ router.get('/success-rate', adminMiddleware, C.getTransactionSuccessRate);
 router.get('/revenue/by-category', adminMiddleware, C.getRevenueByCategory);
 router.get('/revenue/stats', adminMiddleware, C.getRevenueStats);
 router.get('/revenue', adminMiddleware, C.getTotalRevenue);
+router.get('/generate-report', adminMiddleware, C.generateReport);
 
 export default router;
