@@ -7,22 +7,30 @@ const transactionSchema = new Schema({
 	},
 	paymentId: {
 		type: String,
+		default: null,
 	},
 	orderId: {
 		type: String,
 		required: true,
 	},
-	isCaptured: {
-		type: Boolean,
-		default: false,
+	status: {
+		type: String,
+		enum: ['pending', 'success', 'failed'],
+		default: 'failed',
 	},
 	signature: {
 		type: String,
+		default: null,
 	},
 	userId: {
 		type: Schema.Types.ObjectId,
 		ref: 'User',
 		required: true,
+	},
+	paymentMode: {
+		type: String,
+		enum: ['online', 'offline'],
+		default: 'online',
 	},
 	couponCategoryId: {
 		type: Schema.Types.ObjectId,
@@ -37,7 +45,6 @@ const transactionSchema = new Schema({
 		type: Date,
 		default: Date.now,
 	},
-
 });
 
 transactionSchema.pre('save', function (next) {

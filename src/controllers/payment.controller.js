@@ -107,7 +107,7 @@ export const verifySignature = async (req, res) => {
 
 	transaction.signature = razorpay_signature;
 	transaction.paymentId = razorpay_payment_id;
-	transaction.isCaptured = true;
+	transaction.status = 'success';
 
 	await transaction.save();
 

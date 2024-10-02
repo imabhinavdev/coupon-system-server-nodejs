@@ -31,6 +31,7 @@ const couponSchema = new Schema({
 	transactionId: {
 		type: mongoose.Schema.Types.ObjectId,
 		ref: 'Transaction',
+		required: true,
 	},
 	createdAt: {
 		type: Date,

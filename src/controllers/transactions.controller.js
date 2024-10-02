@@ -90,7 +90,7 @@ export const getRevenueStats = async (req, res) => {
 		const revenue = await Transaction.aggregate([
 			{
 				$match: {
-					isCaptured: true,
+					status: 'success',
 					createdAt: {
 						$gte: startDate,
 						$lte: endDate,
@@ -135,10 +135,10 @@ export const getTransactionSuccessRate = async (req, res) => {
 				$group: {
 					_id: null,
 					captured: {
-						$sum: { $cond: [{ $eq: ['$isCaptured', true] }, 1, 0] }, // Updated 'isCaptured'
+						$sum: { $cond: [{ $eq: ['$status', 'success'] }, 1, 0] }, // Updated 'status'
 					},
 					uncaptured: {
-						$sum: { $cond: [{ $eq: ['$isCaptured', false] }, 1, 0] },
+						$sum: { $cond: [{ $eq: ['$status', 'failed'] }, 1, 0] },
 					},
 				},
 			},
@@ -160,7 +160,7 @@ export const getRevenueByCategory = async (req, res) => {
 		const revenueByCategory = await Transaction.aggregate([
 			{
 				$match: {
-					isCaptured: true,
+					status: 'success',
 					createdAt: { $gte: last30Days },
 				},
 			},
@@ -197,7 +197,7 @@ export const getTotalRevenue = async (req, res) => {
 	try {
 		const totalRevenue = await Transaction.aggregate([
 			{
-				$match: { isCaptured: true }, // Updated 'isCaptured'
+				$match: { status: 'success' }, // Updated 'status'
 			},
 			{
 				$group: {

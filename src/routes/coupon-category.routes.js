@@ -5,8 +5,8 @@ import { adminMiddleware } from '../middlewares/auth.middleware.js';
 const router = Router();
 
 router.get('/', C.getCouponCategory);
-router.post('/', C.createCouponCategory);
-router.put('/:id', C.updateCouponCategory);
-router.delete('/:id', C.deleteCouponCategory);
+router.post('/', adminMiddleware, C.createCouponCategory);
+router.put('/:id', adminMiddleware, C.updateCouponCategory);
+router.delete('/:id', adminMiddleware, C.deleteCouponCategory);
 
 export default router;

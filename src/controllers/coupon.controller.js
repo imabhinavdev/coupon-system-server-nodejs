@@ -1,5 +1,6 @@
 import Coupon from '../models/coupon.model.js';
 import CouponCategory from '../models/coupon-category.model.js';
+import Transaction from '../models/transactions.model.js';
 
 export const getCoupons = async (req, res) => {
 	const userId = req.query.user_id;
@@ -42,12 +43,10 @@ export const verifyCoupon = async (req, res) => {
 		coupon.isUsed = true;
 		coupon.scannedBy = scannedBy;
 		await coupon.save();
-		res
-			.status(200)
-			.json({
-				message: 'Coupon verified successfully',
-				noOfPerson: coupon.noOfPerson,
-			});
+		res.status(200).json({
+			message: 'Coupon verified successfully',
+			noOfPerson: coupon.noOfPerson,
+		});
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ message: 'Internal Server Error' });
@@ -72,13 +71,31 @@ export const assignCoupon = async (req, res) => {
 			return res.status(404).json({ message: 'Coupon category not found' });
 		}
 
-		const coupon = Coupon.create({ day, userId, couponCategoryId, noOfPerson });
+		// make new transaction
+		const transaction = await Transaction.create({
+			userId,
+			amount: couponCategory.price * noOfPerson,
+			couponCategoryId,
+			status: 'success',
+			orderId: `cash-order-${Date.now()}`,
+			paymentMode: 'offline',
+		});
 
-		if (!coupon) {
-			return res.status(500).json({ message: 'Error assigning coupon' });
+		if (!transaction) {
+			return res.status(500).json({ message: 'Transaction failed' });
 		}
+		// get today's day like monday, tuesday etc
 
-		res.status(200).json({ message: 'Coupon assigned successfully' });
+		// create coupon
+		const coupon = await Coupon.create({
+			userId,
+			couponCategoryId,
+			noOfPerson,
+			transactionId: transaction._id,
+			day,
+		});
+
+		res.status(200).json({ message: 'Coupon assigned successfully', coupon });
 	} catch (error) {
 		console.error(error);
 		res.status(500).json({ message: 'Internal Server Error' });

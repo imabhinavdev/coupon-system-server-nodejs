@@ -37,12 +37,12 @@ export const adminMiddleware = async (req, res, next) => {
 		if (err) {
 			return res.status(401).json({ error: err.message });
 		}
-		const id = claims.id;
+		const id = claims._id;
 		const user = await User.findById(id);
 		if (!user) {
 			return res.status(401).json({ error: 'Unauthorized: User not found' });
 		}
-		if (!user.role==='admin' || !user.isActive || !user.isVerified) {
+		if (!user.role === 'admin' || !user.isActive || !user.isVerified) {
 			return res
 				.status(401)
 				.json({ error: 'Unauthorized: Admin access required' });
@@ -60,7 +60,7 @@ export const staffMiddleware = async (req, res, next) => {
 		if (err) {
 			return res.status(401).json({ error: err.message });
 		}
-		const id = claims.id;
+		const id = claims._id;
 		const user = await User.findById(id);
 		if (!user) {
 			return res.status(401).json({ error: 'Unauthorized: User not found' });
