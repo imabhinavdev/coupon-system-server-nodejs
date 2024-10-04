@@ -21,6 +21,21 @@ export const getCoupons = async (req, res) => {
 			console.error(error);
 			return res.status(500).json({ message: 'Internal Server Error' });
 		}
+	} else if (date) {
+		const dateObj = new Date(date);
+		dateObj.setHours(0, 0, 0, 0);
+		try {
+			const coupons = await Coupon.find({
+				createdAt: { $gte: dateObj },
+				isUsed: true,
+			})
+				.populate('couponCategoryId')
+				.populate('userId', 'name email');
+			return res.status(200).json({ coupons });
+		} catch (error) {
+			console.error(error);
+			return res.status(500).json({ message: 'Internal Server Error' });
+		}
 	}
 	try {
 		let query = {};
