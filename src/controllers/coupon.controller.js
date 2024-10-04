@@ -5,10 +5,25 @@ import Transaction from '../models/transactions.model.js';
 export const getCoupons = async (req, res) => {
 	const userId = req.query.user_id;
 	const isUsed = req.query.is_used;
-
+	const date = req.query.date;
+	if (date === 'today') {
+		const today = new Date();
+		today.setHours(0, 0, 0, 0);
+		try {
+			const coupons = await Coupon.find({
+				createdAt: { $gte: today },
+				isUsed: true,
+			})
+				.populate('couponCategoryId')
+				.populate('userId', 'name email');
+			return res.status(200).json({ coupons });
+		} catch (error) {
+			console.error(error);
+			return res.status(500).json({ message: 'Internal Server Error' });
+		}
+	}
 	try {
 		let query = {};
-
 		if (isUsed) {
 			query.isUsed = isUsed;
 		}
