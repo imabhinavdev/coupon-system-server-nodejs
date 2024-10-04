@@ -31,7 +31,7 @@ import paymentRoutes from './routes/payment.routes.js';
 import transactionRoutes from './routes/transactions.routes.js';
 import authRoutes from './routes/auth.routes.js';
 import couponCategoryRoutes from './routes/coupon-category.routes.js';
-
+import contactRoutes from './routes/contact.routes.js';
 // Using routes
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/coupon', couponRoutes);
@@ -39,11 +39,12 @@ app.use('/api/v1/payment', paymentRoutes);
 app.use('/api/v1/transactions', transactionRoutes);
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/coupon-category', couponCategoryRoutes);
+app.use('/api/v1/contact', contactRoutes);
 
-// app.listen(process.env.PORT, () => {
-// 	console.log(`Server is running on http://localhost:${process.env.PORT}`);
-// });
+app.listen(process.env.PORT, () => {
+	console.log(`Server is running on http://localhost:${process.env.PORT}`);
+});
 
-export default (req, res) => {
-	app(req, res);
-};
+// export default (req, res) => {
+// 	app(req, res);
+// };
