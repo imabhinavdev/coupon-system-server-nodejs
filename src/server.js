@@ -45,6 +45,7 @@ app.use('/api/v1/contact', contactRoutes);
 // 	console.log(`Server is running on http://localhost:${process.env.PORT}`);
 // });
 
+
 export default (req, res) => {
 	app(req, res);
 };
