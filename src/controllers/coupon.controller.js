@@ -86,8 +86,7 @@ export const verifyCoupon = async (req, res) => {
 // assign coupon to user from admin
 export const assignCoupon = async (req, res) => {
 	try {
-		const { userId, couponCategoryId, noOfPerson } = req.body;
-		// get today's day like monday, tuesday etc
+		const { userId, couponCategoryId, noOfPerson, isVisitor } = req.body;
 		const day = new Date().getDay();
 
 		console.log(userId, couponCategoryId, noOfPerson);
@@ -101,14 +100,18 @@ export const assignCoupon = async (req, res) => {
 			return res.status(404).json({ message: 'Coupon category not found' });
 		}
 
-		// make new transaction
+		let paymentMode = 'offline';
+		if (isVisitor) {
+			paymentMode = 'visitor';
+		}
+
 		const transaction = await Transaction.create({
 			userId,
 			amount: couponCategory.price * noOfPerson,
 			couponCategoryId,
 			status: 'success',
 			orderId: `cash-order-${Date.now()}`,
-			paymentMode: 'offline',
+			paymentMode: paymentMode,
 		});
 
 		if (!transaction) {

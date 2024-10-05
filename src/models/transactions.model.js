@@ -29,7 +29,7 @@ const transactionSchema = new Schema({
 	},
 	paymentMode: {
 		type: String,
-		enum: ['online', 'offline'],
+		enum: ['online', 'offline','visitor'],
 		default: 'online',
 	},
 	couponCategoryId: {

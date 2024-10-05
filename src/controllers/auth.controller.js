@@ -136,8 +136,10 @@ export const login = async (req, res) => {
 		}
 
 		if (!user.isVerified) {
+			user.sendOTP();
 			return res.status(400).json({
-				error: 'Account is not verified',
+				error: 'Account not verified',
+				message: 'OTP sent to email',
 			});
 		}
 

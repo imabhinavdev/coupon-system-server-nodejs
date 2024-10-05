@@ -115,12 +115,14 @@ userSchema.methods.generateToken = function () {
 userSchema.methods.sendOTP = async function () {
 	this.forgotOTP = Math.floor(100000 + Math.random() * 900000).toString();
 	this.forgotOTPExpiry = new Date(Date.now() + 10 * 60 * 1000);
+	const html = `<h1>Your OTP is ${this.forgotOTP} and will expire in 10 minutes</h1>`;
 	await this.save();
 	try {
 		const result = await sendMail(
 			this.email,
 			'Coupon System OTP',
 			`Your OTP is ${this.forgotOTP} and will expire in 10 minutes`,
+			html,
 		);
 		if (result) {
 			return true;
