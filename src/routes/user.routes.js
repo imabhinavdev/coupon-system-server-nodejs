@@ -4,12 +4,12 @@ import { adminMiddleware } from '../middlewares/auth.middleware.js';
 
 const router = Router();
 
-router.get('/', adminMiddleware, C.getUser);
-router.post('/', adminMiddleware, C.createUser);
-router.put('/:id', adminMiddleware, C.updateUser);
-router.delete('/:id', adminMiddleware, C.deleteUser);
-router.get('/active-status', adminMiddleware, C.getUserActiveStatus);
-router.get('/stats/new-users', adminMiddleware, C.getNewUsersStats);
-router.get('/all-details/:id', adminMiddleware, C.getUserAllDetails);
+router.get('/', C.getUser);
+router.post('/', C.createUser);
+router.put('/:id', C.updateUser);
+router.delete('/:id', C.deleteUser);
+router.get('/active-status', C.getUserActiveStatus);
+router.get('/stats/new-users', C.getNewUsersStats);
+router.get('/all-details/:id', C.getUserAllDetails);
 
 export default router;

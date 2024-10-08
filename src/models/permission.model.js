@@ -1,12 +1,12 @@
 import mongoose, { Schema } from 'mongoose';
 
-const routesSchema = new Schema(
+const permissionSchema = new Schema(
 	{
 		name: {
 			type: String,
 			required: true,
 		},
-		route: {
+		value: {
 			type: String,
 			required: true,
 		},
@@ -18,6 +18,6 @@ const routesSchema = new Schema(
 	{ timestamps: true },
 );
 
-const Routes = mongoose.model('Routes', routesSchema);
+const PermissionModel = mongoose.model('Permission', permissionSchema);
 
-export default Routes;
+export default PermissionModel;

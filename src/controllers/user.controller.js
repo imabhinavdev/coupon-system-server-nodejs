@@ -13,8 +13,10 @@ export const createUser = async (req, res) => {
 		isVerified,
 	} = req.body;
 
-	if (!name || !email || !password || !phone) {
-		return res.status(400).json({ error: 'All fields are required' });
+	if (!name || !email || !password || !phone || !role) {
+		return res
+			.status(400)
+			.json({ error: 'Required Fields: name, email, password, phone,role' });
 	}
 
 	try {
@@ -29,9 +31,8 @@ export const createUser = async (req, res) => {
 			password,
 			enrollment,
 			phone,
-			isActive: isActive === true,
 			role,
-			isVerified: isVerified === true,
+			isVerified: isVerified === 'true',
 		});
 
 		await user.save();
@@ -134,7 +135,7 @@ export const getUser = async (req, res) => {
 				],
 			}).select('name email');
 		} else {
-			users = await User.find({});
+			users = await User.find({}).populate('role', 'name');
 		}
 
 		res.status(200).json({ users });

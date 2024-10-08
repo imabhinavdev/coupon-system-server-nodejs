@@ -9,4 +9,3 @@ router.get('/website-name', C.GetWebsiteName);
 router.post('/website-name', C.UpdateWebsiteName);
 
 export default router;
-

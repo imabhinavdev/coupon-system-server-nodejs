@@ -1,4 +1,4 @@
-import { Schema } from 'mongoose';
+import mongoose, { Schema } from 'mongoose';
 
 const roleSchema = new Schema(
 	{
@@ -8,7 +8,7 @@ const roleSchema = new Schema(
 		},
 		permissions: {
 			type: [Schema.Types.ObjectId],
-			ref: 'Routes',
+			ref: 'Permission',
 			default: [],
 		},
 		isActive: {
@@ -19,5 +19,5 @@ const roleSchema = new Schema(
 	{ timestamps: true },
 );
 
-const Role = mongoose.model('Role', roleSchema);
-export default Role;
+const RoleModel = mongoose.model('Role', roleSchema);
+export default RoleModel;

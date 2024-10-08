@@ -36,9 +36,9 @@ const userSchema = new Schema({
 		default: false,
 	},
 	role: {
-		type: String,
-		enum: ['user', 'staff', 'admin', 'superadmin', 'faculty', 'other'],
-		default: 'user',
+		type: Schema.Types.ObjectId,
+		ref: 'Role',
+		required: true,
 	},
 	forgotOTP: {
 		type: String,
@@ -105,7 +105,6 @@ userSchema.methods.generateToken = function () {
 			isActive: this.isActive,
 			name: this.name,
 			email: this.email,
-			role: this.role,
 		},
 		config.JWT_SECRET,
 		{ expiresIn: '1d' },

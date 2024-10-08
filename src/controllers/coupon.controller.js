@@ -87,7 +87,16 @@ export const verifyCoupon = async (req, res) => {
 export const assignCoupon = async (req, res) => {
 	try {
 		const { userId, couponCategoryId, noOfPerson, isVisitor } = req.body;
-		const day = new Date().getDay();
+		const days = [
+			'sunday',
+			'monday',
+			'tuesday',
+			'wednesday',
+			'thursday',
+			'friday',
+			'saturday',
+		];
+		const day = days[new Date().getDay()];
 
 		console.log(userId, couponCategoryId, noOfPerson);
 		Object.keys(req.body).forEach((key) => {

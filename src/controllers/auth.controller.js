@@ -1,4 +1,3 @@
-import e from 'express';
 import User from '../models/user.model.js';
 
 export const signUp = async (req, res) => {
@@ -122,16 +121,24 @@ export const login = async (req, res) => {
 	}
 
 	try {
-		const user = await User.findOne({ email });
+		const user = await User.findOne({ email }).populate({
+			path: 'role',
+			populate: { path: 'permissions', select: 'name value' },
+		});
+
 		if (!user) {
 			return res.status(400).json({
 				error: 'Invalid email',
 			});
 		}
 
+		user.permissions = user.role.permissions.map(
+			(permission) => permission.value,
+		);
+
 		if (!user.isActive) {
 			return res.status(400).json({
-				error: 'Acount is deactivated',
+				error: 'Account is deactivated',
 			});
 		}
 
@@ -150,12 +157,8 @@ export const login = async (req, res) => {
 			});
 		}
 
-		// const token = user.generateToken();
-		// res.cookie('token', token, {
-		// 	maxAge: 3600 * 1000, // 1 hour
-		// 	httpOnly: true,
-		// 	sameSite: 'none',
-		// });
+		// Remove password field before sending the response
+		user.password = undefined;
 
 		const token = await user.generateToken();
 
@@ -167,12 +170,19 @@ export const login = async (req, res) => {
 
 		res.cookie('token', token, options);
 
+		// Exclude role permissions in the response, but include role name
+		const { role, ...userWithoutRole } = user._doc;
+
 		res.status(200).json({
 			message: 'Login successful',
 			user: {
-				...user.toJSON(),
-				token,
+				...userWithoutRole,
+				permissions: user.permissions,
+				role: {
+					name: user.role.name, // Include role name
+				},
 			},
+			token,
 		});
 	} catch (error) {
 		res.status(500).json({

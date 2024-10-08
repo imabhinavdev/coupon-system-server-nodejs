@@ -19,11 +19,11 @@ export default [
 		rules: {
 			'no-unused-vars': 'error',
 			'no-console': 'warn',
-			'consistent-return': 'error',
+			'consistent-return': 'warn',
 			eqeqeq: ['error', 'always'],
 			semi: ['error', 'always'],
 			quotes: ['error', 'single'],
-			indent: ['error', 2],
+			indent: ['error', 'tab'],
 		},
 	},
 ];

@@ -9,7 +9,7 @@
     "dev": "nodemon --experimental-modules --es-module-specifier-resolution=node src/server.js",
     "lint": "eslint src/",
     "format": "prettier --write 'src/**/*.{js,json,md}'",
-    "preparepush": "npm run lint && npm run format"
+    "preparepush": "npm run format && npm run lint "
   },
   "resolutions": {
     "*.js": ""

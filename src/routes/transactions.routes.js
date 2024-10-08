@@ -5,11 +5,11 @@ import { adminMiddleware } from '../middlewares/auth.middleware.js';
 const router = Router();
 
 router.get('/', C.getTransactions);
-router.get('/stats', adminMiddleware, C.getTransactionStats);
-router.get('/success-rate', adminMiddleware, C.getTransactionSuccessRate);
-router.get('/revenue/by-category', adminMiddleware, C.getRevenueByCategory);
-router.get('/revenue/stats', adminMiddleware, C.getRevenueStats);
-router.get('/revenue', adminMiddleware, C.getTotalRevenue);
-router.get('/generate-report', adminMiddleware, C.generateReport);
+router.get('/stats', C.getTransactionStats);
+router.get('/success-rate', C.getTransactionSuccessRate);
+router.get('/revenue/by-category', C.getRevenueByCategory);
+router.get('/revenue/stats', C.getRevenueStats);
+router.get('/revenue', C.getTotalRevenue);
+router.get('/generate-report', C.generateReport);
 
 export default router;

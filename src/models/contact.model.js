@@ -27,7 +27,7 @@ const contactSchema = new Schema(
 );
 
 contactSchema.methods.sendEmailToAdmin = function () {
-	const { name, email, phone, message,subject } = this;
+	const { name, email, phone, message, subject } = this;
 	const text = `You have received a new message from ${name} with email ${email} and phone number ${phone}.The subject is ${subject}. The message is: ${message}`;
 	const html = `<p>You have received a new message from <strong>${name}</strong> with email <strong>${email}</strong> and phone number <strong>${phone}</strong>.The subject is: <br> ${subject} <br><br> The message is: <br><br> <strong>${message}</strong></p>`;
 	return sendMail('abhinavas430@gmail.com', subject, text, html);
