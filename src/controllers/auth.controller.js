@@ -191,10 +191,43 @@ export const login = async (req, res) => {
 	}
 };
 
-export const whoAmI = (req, res) => {
-	const user = req.user;
+export const whoAmI = async (req, res) => {
+	const userId = req.userId;
+	const user = await User.findById(userId).populate({
+		path: 'role',
+		populate: { path: 'permissions', select: 'name value' },
+	});
+
+	if (!user) {
+		return res.status(400).json({
+			error: 'Invalid email',
+		});
+	}
+
+	user.permissions = user.role.permissions.map(
+		(permission) => permission.value,
+	);
+
+	if (!user.isActive) {
+		return res.status(400).json({
+			error: 'Account is deactivated',
+		});
+	}
+
+	if (!user.isVerified) {
+		return res.status(400).json({ message: 'Account not verified' });
+	}
+
+	user.password = undefined;
+
 	res.status(200).json({
-		user,
+		user: {
+			...user.toJSON(),
+			permissions: user.permissions,
+			role: {
+				name: user.role.name,
+			},
+		},
 	});
 };
 

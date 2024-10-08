@@ -13,16 +13,8 @@ export const authMiddleware = (req, res, next) => {
 			return res.status(401).json({ error: 'Unauthorized' });
 		}
 		const userId = claims._id;
-		const user = await User.findById(userId);
-		if (!user) {
-			res.clearCookie('token');
-			return res.status(401).json({ error: 'Unauthorized' });
-		}
-		if (!user.isActive || !user.isVerified) {
-			res.clearCookie('token');
-			return res.status(401).json({ error: 'Unauthorized' });
-		}
-		req.user = user;
+		
+		req.userId = userId;
 
 		next();
 	});
