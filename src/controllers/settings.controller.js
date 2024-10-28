@@ -11,8 +11,9 @@ export const UpdateFooter = async (req, res) => {
 	try {
 		const footer = await Footer.findOne();
 		if (!footer) {
-			return res.status(404).json({
-				error: 'Footer not found',
+			await Footer.create({ value });
+			return res.status(201).json({
+				message: 'Footer created',
 			});
 		}
 		footer.value = value;
