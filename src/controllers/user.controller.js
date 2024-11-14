@@ -2,16 +2,8 @@ import User from '../models/user.model.js';
 import Transactions from '../models/transactions.model.js';
 import Coupon from '../models/coupon.model.js';
 export const createUser = async (req, res) => {
-	const {
-		name,
-		email,
-		password,
-		enrollment,
-		phone,
-		isActive,
-		role,
-		isVerified,
-	} = req.body;
+	const { name, email, password, enrollment, phone, role, isVerified } =
+		req.body;
 
 	if (!name || !email || !password || !phone || !role) {
 		return res
@@ -40,7 +32,9 @@ export const createUser = async (req, res) => {
 
 		res.status(200).json({ message: 'User created successfully', user });
 	} catch (err) {
-		res.status(500).json({ error: 'Error creating user' });
+		res
+			.status(500)
+			.json({ message: 'Error creating user', error: err.message });
 	}
 };
 
@@ -80,7 +74,9 @@ export const updateUser = async (req, res) => {
 			},
 		});
 	} catch (err) {
-		res.status(500).json({ error: 'Error updating user' });
+		res
+			.status(500)
+			.json({ message: 'Error updating user', error: err.message });
 	}
 };
 
@@ -96,7 +92,9 @@ export const deleteUser = async (req, res) => {
 		await user.remove();
 		res.status(200).json({ message: 'User deleted successfully' });
 	} catch (err) {
-		res.status(500).json({ error: 'Error deleting user' });
+		res
+			.status(500)
+			.json({ message: 'Error deleting user', error: err.message });
 	}
 };
 
@@ -140,7 +138,9 @@ export const getUser = async (req, res) => {
 
 		res.status(200).json({ users });
 	} catch (err) {
-		res.status(500).json({ error: 'Error retrieving users' });
+		res
+			.status(500)
+			.json({ messgae: 'Error retrieving users', error: err.message });
 	}
 };
 
@@ -174,7 +174,10 @@ export const getNewUsersStats = async (req, res) => {
 
 		res.status(200).json({ new_users: newUsersCount, days });
 	} catch (err) {
-		res.status(500).json({ error: 'Error retrieving new users statistics' });
+		res.status(500).json({
+			message: 'Error retrieving new users statistics',
+			error: err.message,
+		});
 	}
 };
 export const getUserAllDetails = async (req, res) => {
@@ -201,6 +204,8 @@ export const getUserAllDetails = async (req, res) => {
 
 		res.status(200).json({ user, transactions, orders });
 	} catch (err) {
-		res.status(500).json({ error: 'Error retrieving user details' });
+		res
+			.status(500)
+			.json({ message: 'Error retrieving user details', error: err.message });
 	}
 };

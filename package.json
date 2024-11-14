@@ -3,14 +3,17 @@
   "version": "1.0.0",
   "main": "src/server.js",
   "type": "module",
+
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node --experimental-modules --es-module-specifier-resolution=node src/server.js",
-    "dev": "nodemon --experimental-modules --es-module-specifier-resolution=node src/server.js",
-    "lint": "eslint src/",
-    "format": "prettier --write 'src/**/*.{js,json,md}'",
-    "preparepush": "npm run format && npm run lint "
-  },
+    "test": "npm run test",
+    "dev": "concurrently \"nodemon src/server.js\" \"npm run lint-watch\"",
+    "start": "node src/server.js",
+    "prettify": "prettier --write ./src/**/*.js",
+    "lint": "eslint ./src/**/*.js",
+    "lint-fix": "eslint --fix ./src/**/*.js",
+    "lint-watch": "nodemon --exec \"eslint ./src/**/*.js\" --ext js",
+    "preparepush": "npm run prettify && npm run lint"
+},
   "resolutions": {
     "*.js": ""
   },
@@ -19,6 +22,7 @@
   "description": "",
   "dependencies": {
     "bcrypt": "^5.1.1",
+    "concurrently": "^9.1.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
@@ -36,7 +40,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.11.1",
-    "eslint": "^9.11.1",
+    "eslint": "^9.14.0",
     "globals": "^15.9.0"
   }
 }

@@ -244,7 +244,7 @@ export const getCouponStatsByWeekday = async (req, res) => {
 			{
 				$match: {
 					createdAt: { $gte: last30Days },
-					createdAt: { $ne: null }, // Ensure that createdAt is not null
+					// createdAt: { $ne: null }, // Ensure that createdAt is not null
 				},
 			},
 			{

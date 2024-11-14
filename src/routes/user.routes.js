@@ -1,6 +1,5 @@
 import * as C from '../controllers/user.controller.js';
 import { Router } from 'express';
-import { adminMiddleware } from '../middlewares/auth.middleware.js';
 
 const router = Router();
 

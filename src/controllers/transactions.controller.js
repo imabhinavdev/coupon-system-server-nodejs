@@ -9,13 +9,13 @@ export const getTransactions = async (req, res) => {
 	try {
 		const transactions = userId
 			? await Transaction.find({ userId: userId })
-					.populate('couponCategoryId')
-					.sort({ createdAt: -1 }) // Sorting by 'createdAt'
+				.populate('couponCategoryId')
+				.sort({ createdAt: -1 }) // Sorting by 'createdAt'
 			: await Transaction.find({
-					createdAt: { $gte: moment().subtract(30, 'days').toDate() },
-				})
-					.populate('couponCategoryId')
-					.sort({ createdAt: -1 }); // Sorting by 'createdAt'
+				createdAt: { $gte: moment().subtract(30, 'days').toDate() },
+			})
+				.populate('couponCategoryId')
+				.sort({ createdAt: -1 }); // Sorting by 'createdAt'
 
 		res.status(200).json(transactions);
 	} catch (error) {

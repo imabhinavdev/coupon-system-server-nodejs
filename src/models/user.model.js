@@ -129,6 +129,7 @@ userSchema.methods.sendOTP = async function () {
 			return false;
 		}
 	} catch (error) {
+		console.log(error);
 		return false;
 	}
 };

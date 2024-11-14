@@ -25,8 +25,8 @@ export const createContactFormResponse = async (req, res) => {
 			});
 		}
 
-		const emailSendToAdmin = await contact.sendEmailToAdmin();
-		const emailSendToUser = await contact.sendEmailToUser();
+		await contact.sendEmailToAdmin();
+		await contact.sendEmailToUser();
 
 		return res.status(200).json({
 			message: 'Contact form submitted successfully',

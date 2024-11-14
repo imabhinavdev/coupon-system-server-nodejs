@@ -13,7 +13,7 @@ export const authMiddleware = (req, res, next) => {
 			return res.status(401).json({ error: 'Unauthorized' });
 		}
 		const userId = claims._id;
-		
+
 		req.userId = userId;
 
 		next();

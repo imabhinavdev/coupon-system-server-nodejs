@@ -23,7 +23,8 @@ export const UpdateFooter = async (req, res) => {
 		});
 	} catch (error) {
 		return res.status(500).json({
-			error: 'Error updating footer',
+			message: 'Error updating footer',
+			error: error.message,
 		});
 	}
 };
@@ -41,7 +42,8 @@ export const GetFooter = async (req, res) => {
 		});
 	} catch (error) {
 		return res.status(500).json({
-			error: 'Error getting footer',
+			message: 'Error getting footer',
+			error: error.message,
 		});
 	}
 };
@@ -67,7 +69,8 @@ export const UpdateWebsiteName = async (req, res) => {
 		});
 	} catch (error) {
 		return res.status(500).json({
-			error: 'Error updating website name',
+			message: 'Error updating website name',
+			error: error.message,
 		});
 	}
 };
@@ -85,7 +88,8 @@ export const GetWebsiteName = async (req, res) => {
 		});
 	} catch (error) {
 		return res.status(500).json({
-			error: 'Error getting website name',
+			message: 'Error getting website name',
+			error: error.message,
 		});
 	}
 };

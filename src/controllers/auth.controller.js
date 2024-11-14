@@ -61,6 +61,7 @@ export const signUp = async (req, res) => {
 	} catch (error) {
 		return res.status(500).json({
 			error: 'Error creating user',
+			message: error.message,
 		});
 	}
 };
@@ -106,6 +107,7 @@ export const verifyOTP = async (req, res) => {
 	} catch (error) {
 		return res.status(500).json({
 			error: 'Error verifying OTP',
+			message: error.message,
 		});
 	}
 };
@@ -171,7 +173,7 @@ export const login = async (req, res) => {
 		res.cookie('token', token, options);
 
 		// Exclude role permissions in the response, but include role name
-		const { role, ...userWithoutRole } = user._doc;
+		const { ...userWithoutRole } = user._doc;
 
 		res.status(200).json({
 			message: 'Login successful',
@@ -186,7 +188,8 @@ export const login = async (req, res) => {
 		});
 	} catch (error) {
 		res.status(500).json({
-			error: 'Error logging in',
+			message: 'Error logging in',
+			error: error.message,
 		});
 	}
 };
@@ -273,7 +276,8 @@ export const ForgotOTPEmail = async (req, res) => {
 		});
 	} catch (error) {
 		return res.status(500).json({
-			error: 'Error sending OTP',
+			message: 'Error sending OTP',
+			error: error.message,
 		});
 	}
 };
