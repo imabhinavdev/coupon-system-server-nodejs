@@ -39,6 +39,7 @@ const userSchema = new Schema({
 		type: Schema.Types.ObjectId,
 		ref: 'Role',
 		required: true,
+		default: '673624f19606f3fc2cd6e450',
 	},
 	forgotOTP: {
 		type: String,

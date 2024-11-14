@@ -3,17 +3,16 @@
   "version": "1.0.0",
   "main": "src/server.js",
   "type": "module",
-
   "scripts": {
     "test": "npm run test",
-    "dev": "concurrently \"nodemon src/server.js\" \"npm run lint-watch\"",
+    "dev": "nodemon --exec \"npm run lint && node src/server.js\"",
     "start": "node src/server.js",
     "prettify": "prettier --write ./src/**/*.js",
     "lint": "eslint ./src/**/*.js",
     "lint-fix": "eslint --fix ./src/**/*.js",
     "lint-watch": "nodemon --exec \"eslint ./src/**/*.js\" --ext js",
     "preparepush": "npm run prettify && npm run lint"
-},
+  },
   "resolutions": {
     "*.js": ""
   },

@@ -17,21 +17,6 @@ export const createRole = async (req, res) => {
 
 export const getRoles = async (req, res) => {
 	const isActive = req.query.isActive === 'true';
-	const id = req.query.id;
-	if (id) {
-		try {
-			const role = await RoleModel.findById(id).populate(
-				'permissions',
-				'name value isActive',
-			);
-			if (!role) {
-				return res.status(404).json({ message: 'Role not found' });
-			}
-			return res.status(200).json({ role });
-		} catch (error) {
-			return res.status(500).json({ message: error.message });
-		}
-	}
 
 	if (isActive) {
 		try {
@@ -76,6 +61,22 @@ export const updateRole = async (req, res) => {
 			id,
 			{ name, permissions, isActive },
 			{ new: true },
+		);
+		if (!role) {
+			return res.status(404).json({ message: 'Role not found' });
+		}
+		return res.status(200).json({ role });
+	} catch (error) {
+		return res.status(500).json({ message: error.message });
+	}
+};
+
+export const getRoleById = async (req, res) => {
+	const { id } = req.params;
+	try {
+		const role = await RoleModel.findById(id).populate(
+			'permissions',
+			'name value isActive',
 		);
 		if (!role) {
 			return res.status(404).json({ message: 'Role not found' });

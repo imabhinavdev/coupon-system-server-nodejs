@@ -46,3 +46,39 @@ export const deletePermission = async (req, res) => {
 		return res.status(500).json({ message: error.message });
 	}
 };
+
+export const updatePermission = async (req, res) => {
+	const { id } = req.params;
+	const { name, value } = req.body;
+	if (!name || !value) {
+		return res
+			.status(400)
+			.json({ message: 'Please fill name and value fields' });
+	}
+	try {
+		const permission = await PermissionModel.findByIdAndUpdate(
+			id,
+			{ name, value },
+			{ new: true },
+		);
+		if (!permission) {
+			return res.status(404).json({ message: 'Permission not found' });
+		}
+		return res.status(200).json({ permission });
+	} catch (error) {
+		return res.status(500).json({ message: error.message });
+	}
+};
+
+export const getPermissionById = async (req, res) => {
+	const { id } = req.params;
+	try {
+		const permission = await PermissionModel.findById(id);
+		if (!permission) {
+			return res.status(404).json({ message: 'Permission not found' });
+		}
+		return res.status(200).json({ permission });
+	} catch (error) {
+		return res.status(500).json({ message: error.message });
+	}
+};

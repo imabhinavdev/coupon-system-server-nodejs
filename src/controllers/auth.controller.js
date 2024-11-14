@@ -1,9 +1,9 @@
 import User from '../models/user.model.js';
 
 export const signUp = async (req, res) => {
-	const { name, email, password, enrollment, phone, role } = await req.body;
+	const { name, email, password, enrollment, phone } = await req.body;
 
-	const requiredFields = ['name', 'email', 'password', 'phone', '	'];
+	const requiredFields = ['name', 'email', 'password', 'phone'];
 
 	for (const field of requiredFields) {
 		if (!req.body[field]) {
@@ -26,7 +26,6 @@ export const signUp = async (req, res) => {
 			email,
 			password,
 			phone,
-			role,
 		});
 
 		if (enrollment) {
@@ -59,6 +58,7 @@ export const signUp = async (req, res) => {
 		// 	user: user.toJSON(),
 		// });
 	} catch (error) {
+		console.log(error);
 		return res.status(500).json({
 			error: 'Error creating user',
 			message: error.message,
