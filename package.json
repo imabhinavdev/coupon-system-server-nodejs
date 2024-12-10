@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "test": "npm run test",
-    "dev": "nodemon --exec \"npm run lint && node src/server.js\"",
+    "dev": "nodemon src/server.js",
     "start": "node src/server.js",
     "prettify": "prettier --write ./src/**/*.js",
     "lint": "eslint ./src/**/*.js",
