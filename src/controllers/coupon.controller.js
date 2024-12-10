@@ -1,6 +1,7 @@
 import Coupon from '../models/coupon.model.js';
 import CouponCategory from '../models/coupon-category.model.js';
 import Transaction from '../models/transactions.model.js';
+import User from '../models/user.model.js';
 
 export const getCoupons = async (req, res) => {
 	const userId = req.query.user_id;
@@ -86,7 +87,8 @@ export const verifyCoupon = async (req, res) => {
 // assign coupon to user from admin
 export const assignCoupon = async (req, res) => {
 	try {
-		const { userId, couponCategoryId, noOfPerson, isVisitor } = req.body;
+		const { userId, couponCategoryId, noOfPerson, isVisitor, assignerId } =
+			req.body;
 		const days = [
 			'sunday',
 			'monday',
@@ -112,6 +114,14 @@ export const assignCoupon = async (req, res) => {
 		let paymentMode = 'offline';
 		if (isVisitor) {
 			paymentMode = 'visitor';
+		}
+		if (!isVisitor) {
+			const assigner = await User.findById(assignerId);
+			if (!assigner) {
+				return res.status(404).json({ message: 'Assigner not found' });
+			}
+			assigner.cashDue += couponCategory.price * noOfPerson;
+			await assigner.save();
 		}
 
 		const transaction = await Transaction.create({
