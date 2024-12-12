@@ -16,7 +16,8 @@ export const getCoupons = async (req, res) => {
 				isUsed: true,
 			})
 				.populate('couponCategoryId')
-				.populate('userId', 'name email');
+				.populate('userId', 'name email')
+				.populate('scannedBy', 'name email');
 			return res.status(200).json({ coupons });
 		} catch (error) {
 			console.error(error);
